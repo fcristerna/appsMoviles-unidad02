@@ -2,10 +2,16 @@
     <string name="app_name">App Unidad 02</string>
     <string name="stracercade">Acerca de</string>
     <string name="strInicio">Inicio</string>
-    <string name="strAlumnos">CRUD Alumnos</string>
     <string name="strLista">Lista de Alumnos</string>
     <string name="strSalir">Salir de App</string>
+
+    <string name="strAlumnos">Alumnos</string>
+    <string name="strMatriculaA">Matrícula</string>
+    <string name="strNombreA">Nombre</string>
+    <string name="strDomicilio">Domicilio</string>
+
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+
 
 </resources>

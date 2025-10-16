@@ -1,26 +1,144 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".AlumnosFragment">
-
-    <!-- TODO: Update blank fragment layout -->
-    <LinearLayout
+    android:background="@color/azul_fondo"
+    tools:context="AlumnosFragment">
+    <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@color/fondoCrud">
-
-
-        <TextView
+        android:layout_height="wrap_content"
+        android:background="@color/azul_oscuro">
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/strAlumnos"
-            android:textSize="30sp"
-            android:textAlignment="center"
-            android:background="@color/black"
-            android:textColor="@color/white">
-        </TextView>
-    </LinearLayout>
+            android:layout_height="706dp"
+            android:orientation="vertical"
+            android:padding="20dp">
+            <!-- Título -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@color/azul_medio"
+                android:elevation="3dp"
+                android:gravity="center"
+                android:padding="12dp"
+                android:text="@string/strAlumnos"
+                android:textColor="@color/blanco"
+                android:textSize="22sp"
+                android:textStyle="bold" />
+            <!-- Campo: Matrícula -->
+            <TextView
+                android:id="@+id/lblMatricula"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:text="@string/strMatriculaA"
+                android:textColor="@color/blanco" />
+            <EditText
+                android:id="@+id/txtMatricula"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_edittext_azul"
+                android:hint="Ej. A12345"
+                android:textColor="@color/azul_texto"
+                android:textColorHint="@color/azul_claro" />
+            <!-- Campo: Nombre -->
+            <TextView
+                android:id="@+id/lblNombre"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:text="@string/strNombreA"
+                android:textColor="@color/blanco" />
+            <EditText
+                android:id="@+id/txtNombre"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_edittext_azul"
+                android:hint="Paterno, Materno, Nombres"
+                android:textColor="@color/azul_texto"
+                android:textColorHint="@color/azul_claro" />
+            <!-- Campo: Domicilio -->
+            <TextView
+                android:id="@+id/lblDomicilio"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:text="@string/strDomicilio"
+                android:textColor="@color/blanco" />
+            <EditText
+                android:id="@+id/txtDomicilio"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_edittext_azul"
+                android:hint="Calle # Colonia CP"
+                android:textColor="@color/azul_texto"
+                android:textColorHint="@color/azul_claro" />
+            <!-- Imagen -->
+            <ImageView
+                android:id="@+id/imgAlumno"
+                android:layout_width="150dp"
+                android:layout_height="150dp"
+                android:layout_gravity="center"
+                android:layout_marginTop="15dp"
+                android:layout_marginBottom="15dp"
+                android:background="@color/azul_muy_claro"
+                android:contentDescription="@string/strAlumnos"
+                android:padding="10dp"
+                android:src="@drawable/alumno" />
+            <!-- Campo: Especialidad -->
+            <EditText
+                android:id="@+id/txtEspecialidad"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_edittext_azul"
+                android:hint="Grado, Licenciatura o Ing."
+                android:textColor="@color/azul_texto"
+                android:textColorHint="@color/azul_claro" />
+            <!-- Campo: URL Foto -->
+            <EditText
+                android:id="@+id/txtFoto"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_edittext_azul"
+                android:hint="URL Foto"
+                android:textColor="@color/azul_texto"
+                android:textColorHint="@color/azul_claro" />
+            <!-- Botones -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="15dp"
+                android:gravity="center"
+                android:orientation="horizontal"
+                android:weightSum="3">
+                <Button
+                    android:id="@+id/btnGuardar"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:backgroundTint="@color/azul_medio"
+                    android:text="Guardar"
+                    android:textColor="@color/blanco" />
+                <Button
+                    android:id="@+id/btnBuscar"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="5dp"
+                    android:layout_weight="1"
+                    android:backgroundTint="@color/azul_claro"
+                    android:text="Buscar"
+                    android:textColor="@color/blanco" />
+                <Button
+                    android:id="@+id/btnBorrar"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:backgroundTint="@color/azul_medio"
+                    android:text="Borrar"
+                    android:textColor="@color/blanco" />
+            </LinearLayout>
+        </LinearLayout>
 
-</FrameLayout>
+    </FrameLayout>
+</ScrollView>
