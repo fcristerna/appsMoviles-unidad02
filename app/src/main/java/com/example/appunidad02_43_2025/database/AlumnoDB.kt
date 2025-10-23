@@ -29,11 +29,8 @@ class AlumnoDB(private val context: Context) {
             put(DefinirTabla.Alumnos.DOMICILIO,alumno.domicilio)
             put(DefinirTabla.Alumnos.ESPECIALIDAD,alumno.especialidad)
             put(DefinirTabla.Alumnos.FOTO,alumno.foto)
-
         }
-
         return db.insert(DefinirTabla.Alumnos.TABLA,null,value)
-
     }
 
     fun actualizarAlumno(alumno: Alumno, id: Int): Int {
@@ -72,6 +69,50 @@ class AlumnoDB(private val context: Context) {
         }
 
         return Alumno()
+    }
+
+
+    fun getAlumno(matricula: String): Alumno {
+        val db = dbHelper.readableDatabase
+        val cursor = db.query(
+            DefinirTabla.Alumnos.TABLA,
+            leerRegistro,
+            "${DefinirTabla.Alumnos.MATRICULA} = ?",
+            arrayOf(matricula),
+            null,
+            null,
+            null
+        )
+        cursor.moveToFirst()
+        val alumno = mostrarAlumno(cursor)
+        cursor.close()
+        return alumno
+    }
+
+    fun leerTodos(): ArrayList<Alumno> {
+        val db = dbHelper.readableDatabase
+        val cursor = db.query(
+            DefinirTabla.Alumnos.TABLA,
+            leerRegistro,
+            null,
+            null,
+            null,
+            null,
+            null
+        )
+        val listAlumno = ArrayList<Alumno>()
+        cursor.moveToFirst()
+        while (!cursor.isAfterLast) {
+            val alumno = mostrarAlumno(cursor)
+            listAlumno.add(alumno)
+            cursor.moveToNext()
+        }
+        cursor.close()
+        return listAlumno
+    }
+
+    fun close() {
+        dbHelper.close()
     }
 
 }

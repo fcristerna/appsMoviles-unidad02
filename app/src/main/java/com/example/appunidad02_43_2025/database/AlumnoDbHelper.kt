@@ -20,7 +20,7 @@ class AlumnoDbHelper(context: Context): SQLiteOpenHelper(context,DATABASE_NAME,n
         "${DefinirTabla.Alumnos.NOMBRE} $TEXT_TYPE $COMMA " +
         "${DefinirTabla.Alumnos.DOMICILIO} $TEXT_TYPE $COMMA " +
         "${DefinirTabla.Alumnos.ESPECIALIDAD} $TEXT_TYPE $COMMA " +
-        "${DefinirTabla.Alumnos.FOTO} $TEXT_TYPE "
+        "${DefinirTabla.Alumnos.FOTO} $TEXT_TYPE )"
         private const val SQL_DELETE_ALUMNO = "Drop TABLE IF EXISTS ${DefinirTabla.Alumnos.TABLA}"
     }
 
