@@ -1,6 +1,9 @@
 package com.example.appunidad02_43_2025
 
+import android.app.Activity
 import android.app.AlertDialog
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -9,7 +12,10 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
+import android.widget.TextView
 import android.widget.Toast
+import com.bumptech.glide.Glide
+import com.bumptech.glide.request.RequestOptions
 import com.example.appunidad02_43_2025.database.Alumno
 import com.example.appunidad02_43_2025.database.AlumnoDB
 
@@ -34,13 +40,16 @@ class AlumnosFragment : Fragment() {
     private lateinit var txtNombre : EditText
     private lateinit var txtDomicilio : EditText
     private lateinit var txtEspecialidad : EditText
-    private lateinit var txtFoto : EditText
+    private lateinit var txtFoto : TextView
 
 
     private lateinit var imgFoto : ImageView
 
     private lateinit var db : AlumnoDB
 
+    companion object {
+        private const val PICK_IMAGE_REQUEST = 1
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -64,6 +73,7 @@ class AlumnosFragment : Fragment() {
         txtDomicilio = view.findViewById(R.id.txtDomicilio)
         txtEspecialidad = view.findViewById(R.id.txtEspecialidad)
         txtFoto = view.findViewById(R.id.txtFoto)
+        imgFoto = view.findViewById(R.id.imgAlumno)
     }
 
 
@@ -83,6 +93,8 @@ class AlumnosFragment : Fragment() {
                 val nombre = txtNombre.text.toString()
                 val domicilio = txtDomicilio.text.toString()
                 val especialidad = txtEspecialidad.text.toString()
+                val foto = imgFoto.tag?.toString() ?: ""
+                txtFoto.text = foto
 
                 // Generar el objeto alumno y asignar los datos
                 val dataAlumno = Alumno().apply {
@@ -90,6 +102,7 @@ class AlumnosFragment : Fragment() {
                     this.nombre = nombre
                     this.domicilio = domicilio
                     this.especialidad = especialidad
+                    this.foto = foto
                 }
                 val alumno : Alumno = db.getAlumno(txtMatricula.text.toString())
                 if (alumno.id!=0){
@@ -158,6 +171,16 @@ class AlumnosFragment : Fragment() {
                     txtNombre.setText(alumno.nombre)
                     txtDomicilio.setText(alumno.domicilio)
                     txtEspecialidad.setText(alumno.especialidad)
+
+                    Glide.with(requireContext())
+                        .load(Uri.parse(alumno.foto))
+                        .apply(RequestOptions().override(100,100))
+                        .into(imgFoto)
+
+                    imgFoto.tag = alumno.foto
+                    txtFoto.text = imgFoto.tag?.toString()
+
+
                 } else {
                     Toast.makeText(
                         requireContext(),
@@ -219,13 +242,29 @@ class AlumnosFragment : Fragment() {
             txtMatricula.setText("")
             txtDomicilio.setText("")
             txtEspecialidad.setText("")
+            imgFoto.setImageResource(R.drawable.alumno)
+            imgFoto.tag=null
             txtFoto.setText("")
-
         }
 
+        imgFoto.setOnClickListener(View.OnClickListener {
+            val intent = Intent(Intent.ACTION_PICK)
+            intent.type = "image/*"
+            startActivityForResult(intent, PICK_IMAGE_REQUEST)
+
+        })
     }
 
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
 
+        if (requestCode == PICK_IMAGE_REQUEST && resultCode == Activity.RESULT_OK && data != null){
+            val uri : Uri? = data.data
+            imgFoto.setImageURI((uri))
+            imgFoto.tag = uri.toString()
+            txtFoto.text = imgFoto.tag?.toString()
+        }
+    }
 }
 
 
