@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/cv"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="8dp"
+    app:cardCornerRadius="16dp"
+    app:cardElevation="6dp"
+    app:cardUseCompatPadding="true"
+    app:cardPreventCornerOverlap="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="12dp"
+        android:gravity="center_vertical">
+        <!-- FOTO DEL ALUMNO -->
+        <ImageView
+            android:id="@+id/foto"
+            android:layout_width="72dp"
+            android:layout_height="72dp"
+            android:layout_marginEnd="12dp"
+            android:contentDescription="@string/strFotoDes"
+            android:scaleType="centerCrop"
+            android:src="@drawable/alumno"
+            android:background="@drawable/circulo_fondo"
+            android:padding="4dp"/>
+        <!-- INFORMACIÓN PRINCIPAL -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+            <TextView
+                android:id="@+id/txtAlumnoNombre"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/strNombreA"
+                android:textColor="@color/black"
+                android:textSize="16sp"
+                android:textStyle="bold"/>
+            <TextView
+                android:id="@+id/txtCarrera"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/strCarreraA"
+                android:textColor="@color/dark_gray"
+                android:textSize="14sp"
+                android:layout_marginTop="2dp"/>
+        </LinearLayout>
+        <!-- MATRÍCULA -->
+        <TextView
+            android:id="@+id/txtMatricula"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/strMatriculaA"
+            android:textColor="@color/dark_gray"
+            android:textSize="12sp"
+            android:textStyle="bold"/>
+    </LinearLayout>
+</androidx.cardview.widget.CardView>

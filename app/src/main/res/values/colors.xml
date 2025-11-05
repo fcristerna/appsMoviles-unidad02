@@ -17,4 +17,7 @@
     <color name="azul_texto">#0D47A1</color> <!-- Azul para texto -->
     <color name="blanco">#FFFFFF</color>
     <color name="negro">#000000</color>
+
+    <color name="light_gray">#E0E0E0</color>
+    <color name="dark_gray">#424242</color>
 </resources>
