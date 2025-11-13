@@ -31,21 +31,21 @@ private const val ARG_PARAM2 = "param2"
  */
 class AlumnosFragment : Fragment() {
 
-    private lateinit var btnGuardar : Button
-    private lateinit var btnBuscar : Button
-    private lateinit var btnBorrar : Button
-    private lateinit var btnLimpiar : Button
+    private lateinit var btnGuardar: Button
+    private lateinit var btnBuscar: Button
+    private lateinit var btnBorrar: Button
+    private lateinit var btnLimpiar: Button
 
-    private lateinit var txtMatricula : EditText
-    private lateinit var txtNombre : EditText
-    private lateinit var txtDomicilio : EditText
-    private lateinit var txtEspecialidad : EditText
-    private lateinit var txtFoto : TextView
+    private lateinit var txtMatricula: EditText
+    private lateinit var txtNombre: EditText
+    private lateinit var txtDomicilio: EditText
+    private lateinit var txtEspecialidad: EditText
+    private lateinit var txtFoto: TextView
 
 
-    private lateinit var imgFoto : ImageView
+    private lateinit var imgFoto: ImageView
 
-    private lateinit var db : AlumnoDB
+    private lateinit var db: AlumnoDB
 
     companion object {
         private const val PICK_IMAGE_REQUEST = 1
@@ -59,14 +59,15 @@ class AlumnosFragment : Fragment() {
         val view = inflater.inflate(R.layout.fragment_alumnos, container, false)
         iniciarComponentes(view)
         eventosClic()
+        AlumnoFromListaFragment()
         return view
     }
 
-    fun iniciarComponentes(view : View){
+    fun iniciarComponentes(view: View) {
         btnGuardar = view.findViewById(R.id.btnGuardar)
         btnBuscar = view.findViewById(R.id.btnBuscar)
-        btnBorrar= view.findViewById(R.id.btnBorrar)
-        btnLimpiar= view.findViewById(R.id.btnLimpiar)
+        btnBorrar = view.findViewById(R.id.btnBorrar)
+        btnLimpiar = view.findViewById(R.id.btnLimpiar)
 
         txtNombre = view.findViewById(R.id.txtNombre)
         txtMatricula = view.findViewById(R.id.txtMatricula)
@@ -76,16 +77,29 @@ class AlumnosFragment : Fragment() {
         imgFoto = view.findViewById(R.id.imgAlumno)
     }
 
+    fun AlumnoFromListaFragment() {
+        val alumnoLista = arguments?.getSerializable("miAlumno") as? Alumno
+        alumnoLista.let {
+            Toast.makeText(
+                requireContext(), alumnoLista?.nombre.toString(),
+                Toast.LENGTH_SHORT
+            ).show()
+            txtMatricula.setText(alumnoLista?.matricula)
+            txtNombre.setText(alumnoLista?.nombre)
+            txtDomicilio.setText(alumnoLista?.domicilio)
+            txtEspecialidad.setText(alumnoLista?.especialidad)
+            txtFoto.setText(alumnoLista?.foto)
+            val foto = imgFoto.tag?.toString() ?: ""
+            txtFoto.text = foto
+        }
+    }
 
-    fun eventosClic(){
-        btnGuardar.setOnClickListener{
+    fun eventosClic() {
+        btnGuardar.setOnClickListener {
 
-            if (txtMatricula.text.isEmpty() ||txtNombre.text.isEmpty() ||txtDomicilio.text.isEmpty() ||txtEspecialidad.text.isEmpty() )
-            {
+            if (txtMatricula.text.isEmpty() || txtNombre.text.isEmpty() || txtDomicilio.text.isEmpty() || txtEspecialidad.text.isEmpty()) {
                 Toast.makeText(requireContext(), "Faltó Información", Toast.LENGTH_SHORT).show()
-            }
-
-            else {
+            } else {
 
                 val db = AlumnoDB(requireContext())
                 db.openDataBase()
@@ -104,8 +118,8 @@ class AlumnosFragment : Fragment() {
                     this.especialidad = especialidad
                     this.foto = foto
                 }
-                val alumno : Alumno = db.getAlumno(txtMatricula.text.toString())
-                if (alumno.id!=0){
+                val alumno: Alumno = db.getAlumno(txtMatricula.text.toString())
+                if (alumno.id != 0) {
                     val builder = AlertDialog.Builder(requireContext())
 
                     // preguntar si quiere actualizar datos
@@ -142,28 +156,33 @@ class AlumnosFragment : Fragment() {
                 // si el alumno no existe  insertar nuevo alumno
                 {
                     // insert alumno en tabla
-                    val id : Long = db.insertarAlumno(dataAlumno)
+                    val id: Long = db.insertarAlumno(dataAlumno)
                     // validar si agrego
-                    if (id>0)
-                    {
-                        Toast.makeText(requireContext(), "Se agregó con exito, ID = $id", Toast.LENGTH_SHORT).show()
-                    }
-                    else
-                    {
-                        Toast.makeText(requireContext(), "No fue posible agregar alumno", Toast.LENGTH_SHORT).show()
+                    if (id > 0) {
+                        Toast.makeText(
+                            requireContext(),
+                            "Se agregó con exito, ID = $id",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    } else {
+                        Toast.makeText(
+                            requireContext(),
+                            "No fue posible agregar alumno",
+                            Toast.LENGTH_SHORT
+                        ).show()
 
                     }
                 }
             }
         }
 
-        btnBuscar.setOnClickListener{
+        btnBuscar.setOnClickListener {
             // Validar
-            if (txtMatricula.text.isEmpty()) Toast.makeText(requireContext(),
+            if (txtMatricula.text.isEmpty()) Toast.makeText(
+                requireContext(),
                 "Falto capturar Matricula", Toast.LENGTH_SHORT
             ).show()
-            else
-            {
+            else {
                 db = AlumnoDB(requireContext())
                 db.openDataBase()
                 val alumno: Alumno = db.getAlumno(txtMatricula.text.toString())
@@ -174,7 +193,7 @@ class AlumnosFragment : Fragment() {
 
                     Glide.with(requireContext())
                         .load(Uri.parse(alumno.foto))
-                        .apply(RequestOptions().override(100,100))
+                        .apply(RequestOptions().override(100, 100))
                         .into(imgFoto)
 
                     imgFoto.tag = alumno.foto
@@ -192,10 +211,10 @@ class AlumnosFragment : Fragment() {
             }
 
 
-
         }
         btnBorrar.setOnClickListener {
-            if (txtMatricula.text.isEmpty()) Toast.makeText(requireContext(),
+            if (txtMatricula.text.isEmpty()) Toast.makeText(
+                requireContext(),
                 "Falto capturar Matricula", Toast.LENGTH_SHORT
             ).show()
             else {
@@ -220,7 +239,8 @@ class AlumnosFragment : Fragment() {
                         } else {
                             Toast.makeText(
                                 requireContext(),
-                                "No fue posible borrar alumno", Toast.LENGTH_SHORT).show()
+                                "No fue posible borrar alumno", Toast.LENGTH_SHORT
+                            ).show()
 
                         }
                     }
@@ -243,7 +263,7 @@ class AlumnosFragment : Fragment() {
             txtDomicilio.setText("")
             txtEspecialidad.setText("")
             imgFoto.setImageResource(R.drawable.alumno)
-            imgFoto.tag=null
+            imgFoto.tag = null
             txtFoto.setText("")
         }
 
@@ -258,13 +278,16 @@ class AlumnosFragment : Fragment() {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
-        if (requestCode == PICK_IMAGE_REQUEST && resultCode == Activity.RESULT_OK && data != null){
-            val uri : Uri? = data.data
+        if (requestCode == PICK_IMAGE_REQUEST && resultCode == Activity.RESULT_OK && data != null) {
+            val uri: Uri? = data.data
             imgFoto.setImageURI((uri))
             imgFoto.tag = uri.toString()
             txtFoto.text = imgFoto.tag?.toString()
         }
     }
+
+
+
 }
 
 

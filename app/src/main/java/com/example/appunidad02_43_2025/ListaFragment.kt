@@ -63,6 +63,21 @@ class ListaFragment : Fragment() {
         btnNuevof.setOnClickListener(View.OnClickListener{
             cambiarFragment()
         })
+
+        adapter.setOnClickListener(View.OnClickListener {
+            val pos : Int = rcvLista.getChildLayoutPosition(it)
+            val alumno :Alumno = listaAlumnos[pos]
+            val bundle = Bundle().apply{
+                putSerializable("miAlumno", alumno)
+            }
+
+            val AlumnoFragment = AlumnosFragment()
+            AlumnoFragment.arguments=bundle
+            parentFragmentManager.beginTransaction().replace(R.id.frmContenedor,
+                AlumnoFragment).addToBackStack(null).commit()
+
+
+        })
     }
 
 
