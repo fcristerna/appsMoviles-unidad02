@@ -6,6 +6,9 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import android.widget.Filter
+import android.widget.Filterable
+
 import androidx.recyclerview.widget.RecyclerView
 import com.example.appunidad02_43_2025.database.Alumno
 
@@ -13,9 +16,11 @@ class DbAdapter (
     private var listaAlumno : ArrayList<Alumno>,
     private val contexto : Context
 ) : RecyclerView.Adapter<DbAdapter.ViewHolder>(),
-        View.OnClickListener{
+        View.OnClickListener, Filterable{
             private val inflater : LayoutInflater = LayoutInflater.from(contexto)
     private var listener : View.OnClickListener? = null
+    private var listaAlumnoCompleta: ArrayList<Alumno> = ArrayList(listaAlumno)
+
 
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -60,6 +65,41 @@ class DbAdapter (
 
     fun setOnClickListener(listener: View.OnClickListener) {
         this.listener = listener
+    }
+
+    override fun getFilter(): Filter {
+        return object : Filter() {
+            override fun performFiltering(constraint: CharSequence?): FilterResults {
+                val resultados = FilterResults()
+
+                if (constraint.isNullOrEmpty()) {
+                    resultados.values = listaAlumnoCompleta
+                    resultados.count = listaAlumnoCompleta.size
+                } else {
+                    val query = constraint.toString().lowercase().trim()
+                    val listaFiltrada = ArrayList<Alumno>()
+
+                    for (alumno in listaAlumnoCompleta) {
+                        if (alumno.nombre.lowercase().contains(query) ||
+                            alumno.matricula.lowercase().contains(query)) {
+                            listaFiltrada.add(alumno)
+                        }
+                    }
+
+                    resultados.values = listaFiltrada
+                    resultados.count = listaFiltrada.size
+                }
+
+                return resultados
+            }
+
+            override fun publishResults(constraint: CharSequence?, results: FilterResults?) {
+                if (results != null && results.values != null) {
+                    listaAlumno = results.values as ArrayList<Alumno>
+                    notifyDataSetChanged()
+                }
+            }
+        }
     }
 
     // declarar clase interna

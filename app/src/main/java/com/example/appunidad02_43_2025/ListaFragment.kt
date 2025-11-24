@@ -59,24 +59,36 @@ class ListaFragment : Fragment() {
 
 
     }
-    fun eventosClic(){
-        btnNuevof.setOnClickListener(View.OnClickListener{
+    private fun eventosClic() {
+        btnNuevof.setOnClickListener {
             cambiarFragment()
-        })
+            true
+        }
 
-        adapter.setOnClickListener(View.OnClickListener {
+        adapter.setOnClickListener (View.OnClickListener{
             val pos : Int = rcvLista.getChildLayoutPosition(it)
-            val alumno :Alumno = listaAlumnos[pos]
-            val bundle = Bundle().apply{
+            val alumno : Alumno = listaAlumnos[pos]
+
+            val bundle = Bundle().apply {
                 putSerializable("miAlumno", alumno)
             }
 
             val AlumnoFragment = AlumnosFragment()
-            AlumnoFragment.arguments=bundle
+            AlumnoFragment.arguments = bundle
+
             parentFragmentManager.beginTransaction().replace(R.id.frmContenedor,
                 AlumnoFragment).addToBackStack(null).commit()
+        })
 
+        srv.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String?): Boolean {
+                return false
+            }
 
+            override fun onQueryTextChange(newText: String?): Boolean {
+                adapter.filter.filter(newText)
+                return true
+            }
         })
     }
 

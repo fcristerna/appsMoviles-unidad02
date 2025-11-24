@@ -111,6 +111,72 @@ class AlumnoDB(private val context: Context) {
         return listAlumno
     }
 
+    fun buscarAlumnoPorNombre(nombre: String): ArrayList<Alumno> {
+        val db = dbHelper.readableDatabase
+        val cursor = db.query(
+            DefinirTabla.Alumnos.TABLA,
+            leerRegistro,
+            "${DefinirTabla.Alumnos.NOMBRE} LIKE ?",
+            arrayOf("%$nombre%"),
+            null,
+            null,
+            null
+        )
+        val listAlumno = ArrayList<Alumno>()
+        cursor.moveToFirst()
+        while (!cursor.isAfterLast) {
+            val alumno = mostrarAlumno(cursor)
+            listAlumno.add(alumno)
+            cursor.moveToNext()
+        }
+        cursor.close()
+        return listAlumno
+    }
+
+    fun buscarAlumnoPorMatricula(matricula: String): ArrayList<Alumno> {
+        val db = dbHelper.readableDatabase
+        val cursor = db.query(
+            DefinirTabla.Alumnos.TABLA,
+            leerRegistro,
+            "${DefinirTabla.Alumnos.MATRICULA} LIKE ?",
+            arrayOf("%$matricula%"),
+            null,
+            null,
+            null
+        )
+        val listAlumno = ArrayList<Alumno>()
+        cursor.moveToFirst()
+        while (!cursor.isAfterLast) {
+            val alumno = mostrarAlumno(cursor)
+            listAlumno.add(alumno)
+            cursor.moveToNext()
+        }
+        cursor.close()
+        return listAlumno
+    }
+
+    fun buscarAlumno(query: String): ArrayList<Alumno> {
+        val db = dbHelper.readableDatabase
+        val cursor = db.query(
+            DefinirTabla.Alumnos.TABLA,
+            leerRegistro,
+            "${DefinirTabla.Alumnos.NOMBRE} LIKE ? OR ${DefinirTabla.Alumnos.MATRICULA} LIKE ?",
+            arrayOf("%$query%", "%$query%"),
+            null,
+            null,
+            null
+        )
+        val listAlumno = ArrayList<Alumno>()
+        cursor.moveToFirst()
+        while (!cursor.isAfterLast) {
+            val alumno = mostrarAlumno(cursor)
+            listAlumno.add(alumno)
+            cursor.moveToNext()
+        }
+        cursor.close()
+        return listAlumno
+    }
+
     fun close() {
         dbHelper.close()
     }
