@@ -83,8 +83,12 @@ class AlumnoDB(private val context: Context) {
             null,
             null
         )
-        cursor.moveToFirst()
-        val alumno = mostrarAlumno(cursor)
+
+        var alumno = Alumno()
+        if (cursor.moveToFirst()) {
+            alumno = mostrarAlumno(cursor)
+        }
+
         cursor.close()
         return alumno
     }
