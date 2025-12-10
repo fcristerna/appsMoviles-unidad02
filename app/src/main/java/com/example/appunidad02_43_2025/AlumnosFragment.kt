@@ -18,20 +18,9 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
 import com.example.appunidad02_43_2025.database.Alumno
 import com.example.appunidad02_43_2025.database.AlumnoDB
-import android.content.Context
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 
-// TODO: Rename parameter arguments, choose names that match
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-private const val ARG_PARAM1 = "param1"
-private const val ARG_PARAM2 = "param2"
-
-/**
- * A simple [Fragment] subclass.
- * Use the [AlumnosFragment.newInstance] factory method to
- * create an instance of this fragment.
- */
 class AlumnosFragment : Fragment() {
 
     private lateinit var btnGuardar: Button
@@ -64,12 +53,9 @@ class AlumnosFragment : Fragment() {
         databaseRef = FirebaseDatabase.getInstance().getReference("alumnos")
 
         eventosClic()
-        return view
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
         AlumnoFromListaFragment()
+
+        return view
     }
 
     fun iniciarComponentes(view: View) {
@@ -311,21 +297,17 @@ class AlumnosFragment : Fragment() {
     fun AlumnoFromListaFragment() {
         if (!isAdded) return
 
-        val alumnoLista = arguments?.getSerializable("miAlumno") as? Alumno
+        val alumnoLista =
+            (arguments?.getSerializable("miAlumno") as? Alumno)
+                ?: (arguments?.getSerializable("alumno") as? Alumno)
 
         alumnoLista?.let { alumno ->
-            Toast.makeText(
-                requireContext(),
-                alumno.nombre.toString(),
-                Toast.LENGTH_SHORT
-            ).show()
-
             txtMatricula.setText(alumno.matricula)
             txtNombre.setText(alumno.nombre)
             txtDomicilio.setText(alumno.domicilio)
             txtEspecialidad.setText(alumno.especialidad)
-            txtFoto.setText(alumno.foto.toString())
-            imgFoto.tag = alumno.foto.toString()
+            txtFoto.setText(alumno.foto)
+            imgFoto.tag = alumno.foto
 
             Glide.with(requireContext())
                 .load(alumno.foto)
