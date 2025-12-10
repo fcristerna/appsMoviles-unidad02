@@ -18,6 +18,9 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
 import com.example.appunidad02_43_2025.database.Alumno
 import com.example.appunidad02_43_2025.database.AlumnoDB
+import android.content.Context
+import com.google.firebase.database.DatabaseReference
+import com.google.firebase.database.FirebaseDatabase
 
 // TODO: Rename parameter arguments, choose names that match
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -44,6 +47,7 @@ class AlumnosFragment : Fragment() {
 
     private lateinit var imgFoto: ImageView
     private lateinit var db: AlumnoDB
+    private lateinit var databaseRef: DatabaseReference
 
     companion object {
         private const val PICK_IMAGE_REQUEST = 1
@@ -56,6 +60,9 @@ class AlumnosFragment : Fragment() {
         val view = inflater.inflate(R.layout.fragment_alumnos, container, false)
 
         iniciarComponentes(view)
+
+        databaseRef = FirebaseDatabase.getInstance().getReference("alumnos")
+
         eventosClic()
         return view
     }
@@ -85,118 +92,129 @@ class AlumnosFragment : Fragment() {
 
         btnGuardar.setOnClickListener {
 
-            if (txtMatricula.text.isEmpty() ||
-                txtNombre.text.isEmpty() ||
-                txtDomicilio.text.isEmpty() ||
-                txtEspecialidad.text.isEmpty()
-            ) {
-                Toast.makeText(requireContext(), "Faltó Información", Toast.LENGTH_SHORT).show()
+            val matricula = txtMatricula.text.toString().trim()
+            val nombre = txtNombre.text.toString().trim()
+            val domicilio = txtDomicilio.text.toString().trim()
+            val especialidad = txtEspecialidad.text.toString().trim()
+            val foto = imgFoto.tag?.toString() ?: ""
+
+            if (matricula.isEmpty() || nombre.isEmpty() || domicilio.isEmpty() || especialidad.isEmpty()) {
+                Toast.makeText(requireContext(), "Faltó información", Toast.LENGTH_SHORT).show()
             } else {
+                try {
+                    txtFoto.setText(foto)
 
-                val db = AlumnoDB(requireContext())
-                db.openDataBase()
+                    val dataAlumno = Alumno().apply {
+                        this.matricula = matricula
+                        this.nombre = nombre
+                        this.domicilio = domicilio
+                        this.especialidad = especialidad
+                        this.foto = foto
+                    }
 
-                val matricula = txtMatricula.text.toString()
-                val nombre = txtNombre.text.toString()
-                val domicilio = txtDomicilio.text.toString()
-                val especialidad = txtEspecialidad.text.toString()
-                val foto = imgFoto.tag?.toString() ?: ""
-                txtFoto.setText(foto)
+                    val dbCheck = AlumnoDB(requireContext())
+                    dbCheck.openDataBase()
+                    val alumnoExistente: Alumno = dbCheck.getAlumno(matricula)
+                    dbCheck.close()
 
-                // Generar el objeto alumno y asignar los datos
-                val dataAlumno = Alumno().apply {
-                    this.matricula = matricula
-                    this.nombre = nombre
-                    this.domicilio = domicilio
-                    this.especialidad = especialidad
-                    this.foto = foto
-                }
+                    if (alumnoExistente.id != 0) {
+                        val builder = AlertDialog.Builder(requireContext())
+                        builder.setTitle("CRUD Alumnos")
+                        builder.setMessage("El alumno ya existe. ¿Deseas actualizar datos?")
 
-                // validar primero si el alumno ya existe para actualizar datos
-                val alumno: Alumno = db.getAlumno(txtMatricula.text.toString())
-                if (alumno.id != 0) {
-                    // update alumno
-                    val builder = AlertDialog.Builder(requireContext())
+                        builder.setPositiveButton("Aceptar") { _, _ ->
+                            val dbUpdate = AlumnoDB(requireContext())
+                            dbUpdate.openDataBase()
 
-                    // preguntar si quiere actualizar datos
-                    builder.setTitle("CRUD Alumnos")
-                    builder.setMessage("El alumno ya existe ¿Deseas Actualizar datos?")
+                            var key = alumnoExistente.firebaseId
+                            if (key.isNullOrEmpty()) {
+                                key = databaseRef.push().key
+                            }
 
-                    builder.setPositiveButton("Aceptar") { dialog, _ ->
-                        val id: Int = db.actualizarAlumno(dataAlumno, alumno.id)
-                        // validar si Actualizo
-                        if (id > 0) {
-                            Toast.makeText(
-                                requireContext(),
-                                "Se Actualizó con éxito, ID = $id",
-                                Toast.LENGTH_SHORT
-                            ).show()
-                        } else {
-                            Toast.makeText(
-                                requireContext(),
-                                "No fue posible Actualizar alumno",
-                                Toast.LENGTH_SHORT
-                            ).show()
+                            if (!key.isNullOrEmpty()) {
+                                dataAlumno.firebaseId = key
+                                dataAlumno.pendienteSincronizacion = false
+                                dbUpdate.actualizarAlumno(dataAlumno, alumnoExistente.id)
+                                databaseRef.child(key).setValue(dataAlumno)
+                                Toast.makeText(requireContext(), "Alumno actualizado", Toast.LENGTH_SHORT).show()
+                            } else {
+                                dataAlumno.pendienteSincronizacion = true
+                                dbUpdate.actualizarAlumno(dataAlumno, alumnoExistente.id)
+                                Toast.makeText(requireContext(), "Actualizado solo local", Toast.LENGTH_SHORT).show()
+                            }
+
+                            dbUpdate.close()
                         }
-                    }
-                    builder.setNegativeButton("Cancelar") { dialog, _ ->
-                        Toast.makeText(requireContext(), "Cancelado", Toast.LENGTH_SHORT).show()
-                    }
-                    builder.show()
-                } else {
-                    // si el alumno no existe podemos insertar nuevo alumno
-                    val id: Long = db.insertarAlumno(dataAlumno)
-                    if (id > 0) {
-                        Toast.makeText(
-                            requireContext(),
-                            "Se agregó con éxito, ID = $id",
-                            Toast.LENGTH_SHORT
-                        ).show()
-                    } else {
-                        Toast.makeText(
-                            requireContext(),
-                            "No fue posible agregar alumno",
-                            Toast.LENGTH_SHORT
-                        ).show()
-                    }
-                }
 
-                db.close()
+                        builder.setNegativeButton("Cancelar") { _, _ ->
+                            Toast.makeText(requireContext(), "Cancelado", Toast.LENGTH_SHORT).show()
+                        }
+
+                        builder.show()
+
+                    } else {
+                        val dbInsert = AlumnoDB(requireContext())
+                        dbInsert.openDataBase()
+
+                        val key = databaseRef.push().key
+                        if (!key.isNullOrEmpty()) {
+                            dataAlumno.firebaseId = key
+                            dataAlumno.pendienteSincronizacion = false
+                            val idLocal: Long = dbInsert.insertarAlumno(dataAlumno)
+                            databaseRef.child(key).setValue(dataAlumno)
+                            Toast.makeText(requireContext(), "Alumno guardado. ID local = $idLocal", Toast.LENGTH_SHORT).show()
+                        } else {
+                            dataAlumno.pendienteSincronizacion = true
+                            val idLocal: Long = dbInsert.insertarAlumno(dataAlumno)
+                            Toast.makeText(requireContext(), "Guardado solo local. ID = $idLocal", Toast.LENGTH_SHORT).show()
+                        }
+
+                        dbInsert.close()
+                    }
+
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    Toast.makeText(requireContext(), "ERROR: ${e.message}", Toast.LENGTH_LONG).show()
+                }
             }
         }
 
         btnBuscar.setOnClickListener {
-            if (txtMatricula.text.isEmpty()) {
-                Toast.makeText(
-                    requireContext(),
-                    "Falto capturar Matrícula",
-                    Toast.LENGTH_SHORT
-                ).show()
+            val matricula = txtMatricula.text.toString().trim()
+
+            if (matricula.isEmpty()) {
+                Toast.makeText(requireContext(), "Capture matrícula", Toast.LENGTH_SHORT).show()
             } else {
                 db = AlumnoDB(requireContext())
                 db.openDataBase()
-                val alumno: Alumno = db.getAlumno(txtMatricula.text.toString())
-                if (alumno.id != 0) {
-                    txtNombre.setText(alumno.nombre)
-                    txtDomicilio.setText(alumno.domicilio)
-                    txtEspecialidad.setText(alumno.especialidad)
 
-                    Glide.with(requireContext())
-                        .load(alumno.foto) // guardas string de la URI en DB
-                        .error(R.drawable.alumno)
-                        .apply(RequestOptions().override(100, 100))
-                        .into(imgFoto)
+                try {
+                    val alumno: Alumno = db.getAlumno(matricula)
 
-                    imgFoto.tag = alumno.foto
-                    txtFoto.setText(imgFoto.tag?.toString())
-                } else {
-                    Toast.makeText(
-                        requireContext(),
-                        "No se encontró al alumno",
-                        Toast.LENGTH_SHORT
-                    ).show()
+                    if (alumno.id != 0) {
+                        txtMatricula.setText(alumno.matricula)
+                        txtNombre.setText(alumno.nombre)
+                        txtDomicilio.setText(alumno.domicilio)
+                        txtEspecialidad.setText(alumno.especialidad)
+
+                        Glide.with(requireContext())
+                            .load(alumno.foto)
+                            .error(R.drawable.alumno)
+                            .apply(RequestOptions().override(100, 100))
+                            .into(imgFoto)
+
+                        imgFoto.tag = alumno.foto
+                        txtFoto.setText(imgFoto.tag?.toString())
+                    } else {
+                        Toast.makeText(requireContext(), "No se encontró al alumno", Toast.LENGTH_SHORT).show()
+                    }
+
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    Toast.makeText(requireContext(), "ERROR DB: ${e.message}", Toast.LENGTH_LONG).show()
+                } finally {
+                    db.close()
                 }
-                db.close()
             }
         }
 
@@ -208,32 +226,35 @@ class AlumnosFragment : Fragment() {
                     Toast.LENGTH_SHORT
                 ).show()
             } else {
-
                 val builder = AlertDialog.Builder(requireContext())
-
                 builder.setTitle("CRUD Alumnos")
                 builder.setMessage("¿Deseas eliminar datos del alumno permanentemente?")
 
-                builder.setPositiveButton("Aceptar") { dialog, _ ->
+                builder.setPositiveButton("Aceptar") { _, _ ->
                     db = AlumnoDB(requireContext())
                     db.openDataBase()
                     val alumno: Alumno = db.getAlumno(txtMatricula.text.toString())
                     if (alumno.id != 0) {
+                        val firebaseId = alumno.firebaseId
+                        if (!firebaseId.isNullOrEmpty()) {
+                            databaseRef.child(firebaseId).removeValue()
+                        }
+
                         val id: Int = db.borrarAlumno(alumno.id)
                         if (id > 0) {
                             Toast.makeText(
                                 requireContext(),
-                                "Borrado con éxito, ID = $id",
+                                "Borrado con éxito",
                                 Toast.LENGTH_SHORT
                             ).show()
-                            // limpiar campos después de borrar
+
                             txtMatricula.setText("")
                             txtNombre.setText("")
                             txtDomicilio.setText("")
                             txtEspecialidad.setText("")
+                            txtFoto.setText("")
                             imgFoto.setImageResource(R.drawable.alumno)
                             imgFoto.tag = null
-                            txtFoto.setText("")
                         } else {
                             Toast.makeText(
                                 requireContext(),
@@ -241,11 +262,17 @@ class AlumnosFragment : Fragment() {
                                 Toast.LENGTH_SHORT
                             ).show()
                         }
+                    } else {
+                        Toast.makeText(
+                            requireContext(),
+                            "Alumno no encontrado",
+                            Toast.LENGTH_SHORT
+                        ).show()
                     }
                     db.close()
                 }
 
-                builder.setNegativeButton("Cancelar") { dialog, _ ->
+                builder.setNegativeButton("Cancelar") { _, _ ->
                     Toast.makeText(requireContext(), "Cancelado", Toast.LENGTH_SHORT).show()
                 }
 
@@ -253,23 +280,14 @@ class AlumnosFragment : Fragment() {
             }
         }
 
-        // LIMPIAR
         btnLimpiar.setOnClickListener {
-            if (txtMatricula.text.isEmpty() &&
-                txtNombre.text.isEmpty() &&
-                txtDomicilio.text.isEmpty() &&
-                txtEspecialidad.text.isEmpty()
-            ) {
-                Toast.makeText(requireContext(), "Limpio", Toast.LENGTH_SHORT).show()
-            } else {
-                txtMatricula.setText("")
-                txtNombre.setText("")
-                txtDomicilio.setText("")
-                txtEspecialidad.setText("")
-                imgFoto.setImageResource(R.drawable.alumno)
-                imgFoto.tag = null
-                txtFoto.setText("")
-            }
+            txtMatricula.setText("")
+            txtNombre.setText("")
+            txtDomicilio.setText("")
+            txtEspecialidad.setText("")
+            txtFoto.setText("")
+            imgFoto.setImageResource(R.drawable.alumno)
+            imgFoto.tag = null
         }
 
         imgFoto.setOnClickListener {

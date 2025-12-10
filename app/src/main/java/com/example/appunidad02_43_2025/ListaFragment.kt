@@ -13,6 +13,7 @@ import com.example.appunidad02_43_2025.database.Alumno
 import com.example.appunidad02_43_2025.database.AlumnoDB
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.google.firebase.database.FirebaseDatabase
 
 class ListaFragment : Fragment() {
     private lateinit var adapter: DbAdapter
@@ -20,19 +21,41 @@ class ListaFragment : Fragment() {
     private lateinit var btnNuevof: FloatingActionButton
     private lateinit var listaAlumnos: ArrayList<Alumno>
     private lateinit var db: AlumnoDB
-    private var srv: SearchView? = null   // igual que en el código bien (nullable)
+    private var srv: SearchView? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        // En onCreateView, solo inflamos la vista
         return inflater.inflate(R.layout.fragment_lista, container, false)
     }
-
+    private fun sincronizarFirebaseConLocal() {
+        val dbLocal = AlumnoDB(requireContext())
+        dbLocal.openDataBase()
+        val alumnosLocales = dbLocal.leerTodos()
+        dbLocal.close()
+        val idsFirebaseLocales = alumnosLocales
+            .mapNotNull { it.firebaseId }
+            .toSet()
+        FirebaseDatabase.getInstance()
+            .getReference("alumnos")
+            .get()
+            .addOnSuccessListener { snapshot ->
+                for (child in snapshot.children) {
+                    val key = child.key
+                    if (key != null && !idsFirebaseLocales.contains(key)) {
+                        child.ref.removeValue()
+                    }
+                }
+            }
+    }
+    override fun onResume() {
+        super.onResume()
+        sincronizarFirebaseConLocal()
+        cargarAlumnos()
+    }
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        // onViewCreated es el lugar para inicializar vistas y cargar datos
         iniciarComponentes(view)
         eventosClic()
         cargarAlumnos()
@@ -51,12 +74,10 @@ class ListaFragment : Fragment() {
     }
 
     private fun eventosClic() {
-        // FAB nuevo alumno → usa cambiarFragment()
         btnNuevof.setOnClickListener {
             cambiarFragment()
         }
 
-        // Click en item del Recycler (igual que código bien)
         adapter.setOnClickListener(View.OnClickListener { view ->
             val pos: Int = rcvLista.getChildAdapterPosition(view)
             val alumno = (rcvLista.adapter as DbAdapter).getItem(pos)
@@ -68,19 +89,16 @@ class ListaFragment : Fragment() {
             val alumnoFragment = AlumnosFragment()
             alumnoFragment.arguments = bundle
 
-            // Marcar el botón de alumnos en el BottomNavigation
             val bottom =
                 requireActivity().findViewById<BottomNavigationView>(R.id.btnNavegador)
             bottom.menu.findItem(R.id.btnAlumnos).isChecked = true
 
-            // Abrir el fragment de detalle
             parentFragmentManager.beginTransaction()
                 .replace(R.id.frmContenedor, alumnoFragment)
                 .addToBackStack(null)
                 .commit()
         })
 
-        // Buscador
         srv?.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String?): Boolean {
                 return false
@@ -120,7 +138,6 @@ class ListaFragment : Fragment() {
             requireActivity().findViewById<BottomNavigationView>(R.id.btnNavegador)
         bottom.menu.findItem(R.id.btnAlumnos).isChecked = true
 
-        // Aquí respetamos tu MainActivity con setSelectedTab
         (activity as? MainActivity)?.setSelectedTab(R.id.btnAlumnos)
     }
 }

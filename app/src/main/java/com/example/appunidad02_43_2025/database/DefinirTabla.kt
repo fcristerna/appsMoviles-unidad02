@@ -11,6 +11,8 @@ class DefinirTabla {
         const val ESPECIALIDAD = "especialidad"
         const val FOTO = "foto"
         const val DOMICILIO = "domicilio"
+        const val FIREBASE_ID = "firebase_id"
+        const val PENDIENTE = "pendiente_sinc"
 
 
 
