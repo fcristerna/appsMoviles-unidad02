@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="18dp"
+    android:background="@drawable/bg_dialog_redondeado">
+
+    <ImageView
+        android:id="@+id/imgPreviewQR"
+        android:layout_width="match_parent"
+        android:layout_height="290dp"
+        android:scaleType="centerCrop"
+        android:background="#D9D9D9"
+        android:contentDescription="Foto Alumno" />
+
+    <!-- DATOS DEL ALUMNO -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingTop="12dp">
+
+        <TextView
+            android:id="@+id/lblValMatricula"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Matrícula:"
+            android:textStyle="bold"
+            android:textSize="15sp"
+            android:textColor="@color/negro" />
+
+        <TextView
+            android:id="@+id/lblValNombre"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Nombre:"
+            android:textSize="14sp" />
+
+        <TextView
+            android:id="@+id/lblValCarrera"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Carrera:"
+            android:textSize="14sp" />
+
+        <TextView
+            android:id="@+id/lblValDomicilio"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Domicilio:"
+            android:textSize="14sp" />
+
+        <TextView
+            android:id="@+id/lblValFotoUrl"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Foto (URL):"
+            android:textColor="@color/dark_gray"
+            android:maxLines="1"
+            android:ellipsize="end"
+            android:textSize="12sp"
+            android:layout_marginBottom="10dp" />
+
+    </LinearLayout>
+
+    <!-- Botones -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/btnValidarDatos"
+            android:layout_width="0dp"
+            android:layout_height="50dp"
+            android:layout_weight="1"
+            android:text="Validar"
+            android:textStyle="bold"
+            android:textColor="@color/blanco"
+            android:backgroundTint="@color/azul_medio" />
+
+        <Space
+            android:layout_width="10dp"
+            android:layout_height="match_parent" />
+
+        <Button
+            android:id="@+id/btnCancelarValidacion"
+            android:layout_width="0dp"
+            android:layout_height="50dp"
+            android:layout_weight="1"
+            android:text="Cancelar"
+            android:textStyle="bold"
+            android:textColor="@color/blanco"
+            android:backgroundTint="@color/rojo" />
+
+    </LinearLayout>
+
+</LinearLayout>

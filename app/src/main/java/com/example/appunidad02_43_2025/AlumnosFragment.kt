@@ -242,7 +242,7 @@ class AlumnosFragment : Fragment() {
                             imgFoto.setImageResource(R.drawable.alumno)
                             imgFoto.tag = null
                         } else {
-                            Toast.makeText(
+                             Toast.makeText(
                                 requireContext(),
                                 "No fue posible borrar alumno",
                                 Toast.LENGTH_SHORT

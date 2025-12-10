@@ -34,13 +34,8 @@ class ListaFragment : Fragment() {
         dbLocal.openDataBase()
         val alumnosLocales = dbLocal.leerTodos()
         dbLocal.close()
-        val idsFirebaseLocales = alumnosLocales
-            .mapNotNull { it.firebaseId }
-            .toSet()
-        FirebaseDatabase.getInstance()
-            .getReference("alumnos")
-            .get()
-            .addOnSuccessListener { snapshot ->
+        val idsFirebaseLocales = alumnosLocales.mapNotNull { it.firebaseId }.toSet()
+        FirebaseDatabase.getInstance().getReference("alumnos").get().addOnSuccessListener { snapshot ->
                 for (child in snapshot.children) {
                     val key = child.key
                     if (key != null && !idsFirebaseLocales.contains(key)) {
