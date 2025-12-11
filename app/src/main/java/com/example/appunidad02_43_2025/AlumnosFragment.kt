@@ -90,14 +90,6 @@ class AlumnosFragment : Fragment() {
                 try {
                     txtFoto.setText(foto)
 
-                    val dataAlumno = Alumno().apply {
-                        this.matricula = matricula
-                        this.nombre = nombre
-                        this.domicilio = domicilio
-                        this.especialidad = especialidad
-                        this.foto = foto
-                    }
-
                     val dbCheck = AlumnoDB(requireContext())
                     dbCheck.openDataBase()
                     val alumnoExistente: Alumno = dbCheck.getAlumno(matricula)
@@ -109,27 +101,24 @@ class AlumnosFragment : Fragment() {
                         builder.setMessage("El alumno ya existe. ¿Deseas actualizar datos?")
 
                         builder.setPositiveButton("Aceptar") { _, _ ->
+                            val key = alumnoExistente.firebaseId ?: databaseRef.push().key
+
+                            val dataAlumno = alumnoExistente.apply {
+                                this.matricula = matricula
+                                this.nombre = nombre
+                                this.domicilio = domicilio
+                                this.especialidad = especialidad
+                                this.foto = foto
+                                this.firebaseId = key
+                                this.pendienteSincronizacion = true
+                            }
+
                             val dbUpdate = AlumnoDB(requireContext())
                             dbUpdate.openDataBase()
-
-                            var key = alumnoExistente.firebaseId
-                            if (key.isNullOrEmpty()) {
-                                key = databaseRef.push().key
-                            }
-
-                            if (!key.isNullOrEmpty()) {
-                                dataAlumno.firebaseId = key
-                                dataAlumno.pendienteSincronizacion = false
-                                dbUpdate.actualizarAlumno(dataAlumno, alumnoExistente.id)
-                                databaseRef.child(key).setValue(dataAlumno)
-                                Toast.makeText(requireContext(), "Alumno actualizado", Toast.LENGTH_SHORT).show()
-                            } else {
-                                dataAlumno.pendienteSincronizacion = true
-                                dbUpdate.actualizarAlumno(dataAlumno, alumnoExistente.id)
-                                Toast.makeText(requireContext(), "Actualizado solo local", Toast.LENGTH_SHORT).show()
-                            }
-
+                            dbUpdate.actualizarAlumno(dataAlumno, alumnoExistente.id)
                             dbUpdate.close()
+
+                            Toast.makeText(requireContext(), "Alumno actualizado (pendiente de sincronizar)", Toast.LENGTH_SHORT).show()
                         }
 
                         builder.setNegativeButton("Cancelar") { _, _ ->
@@ -139,23 +128,24 @@ class AlumnosFragment : Fragment() {
                         builder.show()
 
                     } else {
-                        val dbInsert = AlumnoDB(requireContext())
-                        dbInsert.openDataBase()
-
                         val key = databaseRef.push().key
-                        if (!key.isNullOrEmpty()) {
-                            dataAlumno.firebaseId = key
-                            dataAlumno.pendienteSincronizacion = false
-                            val idLocal: Long = dbInsert.insertarAlumno(dataAlumno)
-                            databaseRef.child(key).setValue(dataAlumno)
-                            Toast.makeText(requireContext(), "Alumno guardado. ID local = $idLocal", Toast.LENGTH_SHORT).show()
-                        } else {
-                            dataAlumno.pendienteSincronizacion = true
-                            val idLocal: Long = dbInsert.insertarAlumno(dataAlumno)
-                            Toast.makeText(requireContext(), "Guardado solo local. ID = $idLocal", Toast.LENGTH_SHORT).show()
+
+                        val dataAlumno = Alumno().apply {
+                            this.matricula = matricula
+                            this.nombre = nombre
+                            this.domicilio = domicilio
+                            this.especialidad = especialidad
+                            this.foto = foto
+                            this.firebaseId = key
+                            this.pendienteSincronizacion = true
                         }
 
+                        val dbInsert = AlumnoDB(requireContext())
+                        dbInsert.openDataBase()
+                        val idLocal: Long = dbInsert.insertarAlumno(dataAlumno)
                         dbInsert.close()
+
+                        Toast.makeText(requireContext(), "Alumno guardado localmente (ID = $idLocal)", Toast.LENGTH_SHORT).show()
                     }
 
                 } catch (e: Exception) {
@@ -242,7 +232,7 @@ class AlumnosFragment : Fragment() {
                             imgFoto.setImageResource(R.drawable.alumno)
                             imgFoto.tag = null
                         } else {
-                             Toast.makeText(
+                            Toast.makeText(
                                 requireContext(),
                                 "No fue posible borrar alumno",
                                 Toast.LENGTH_SHORT

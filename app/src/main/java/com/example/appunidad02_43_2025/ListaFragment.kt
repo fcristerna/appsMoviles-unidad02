@@ -30,19 +30,40 @@ class ListaFragment : Fragment() {
         return inflater.inflate(R.layout.fragment_lista, container, false)
     }
     private fun sincronizarFirebaseConLocal() {
-        val dbLocal = AlumnoDB(requireContext())
+        val ctx = context ?: return
+
+        val dbLocal = AlumnoDB(ctx)
         dbLocal.openDataBase()
         val alumnosLocales = dbLocal.leerTodos()
         dbLocal.close()
-        val idsFirebaseLocales = alumnosLocales.mapNotNull { it.firebaseId }.toSet()
-        FirebaseDatabase.getInstance().getReference("alumnos").get().addOnSuccessListener { snapshot ->
-                for (child in snapshot.children) {
-                    val key = child.key
-                    if (key != null && !idsFirebaseLocales.contains(key)) {
-                        child.ref.removeValue()
-                    }
+
+        val ref = FirebaseDatabase.getInstance().getReference("alumnos")
+
+        for (alumno in alumnosLocales) {
+            if (alumno.pendienteSincronizacion) {
+                if (alumno.firebaseId.isNullOrEmpty()) {
+                    val key = ref.push().key ?: continue
+                    alumno.firebaseId = key
+
+                    val dbUpdate = AlumnoDB(ctx)
+                    dbUpdate.openDataBase()
+                    dbUpdate.actualizarAlumno(alumno, alumno.id)
+                    dbUpdate.close()
                 }
+
+                val key = alumno.firebaseId ?: continue
+
+                ref.child(key).setValue(alumno)
+                    .addOnSuccessListener {
+                        val ctxInner = context ?: return@addOnSuccessListener
+                        alumno.pendienteSincronizacion = false
+                        val dbUpdate = AlumnoDB(ctxInner)
+                        dbUpdate.openDataBase()
+                        dbUpdate.actualizarAlumno(alumno, alumno.id)
+                        dbUpdate.close()
+                    }
             }
+        }
     }
     override fun onResume() {
         super.onResume()
